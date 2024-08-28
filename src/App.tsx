@@ -1,24 +1,23 @@
 import React from 'react';
-import logo from './logo.svg';
 import './App.css';
+import {useQuery} from "react-query";
+import {GetUsers} from "./api/getUsers";
 
-function App() {
+const App = () => {
+  const {data, isLoading, error} = useQuery([
+    'getUsers', {limit: 10}
+  ], () => GetUsers({limit: 10}))
+  console.log(data)
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
+  
+  if (error) {
+    return <div>Error loading popular products</div>;
+  }
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      Hello
     </div>
   );
 }
