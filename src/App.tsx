@@ -1,9 +1,11 @@
-import React from 'react';
+import React, {useState} from 'react';
 import './App.css';
 import {useQuery} from "react-query";
 import {GetUsers} from "./api/getUsers";
 import {
   Avatar,
+  CircularProgress,
+  Pagination,
   Paper,
   Table,
   TableBody,
@@ -30,17 +32,26 @@ interface Data {
 }
 
 const App = () => {
-  const {data, isLoading, error} = useQuery<Data>([
-    'getUsers', {limit: 10}
-  ], () => GetUsers({limit: 10}))
-  console.log(data)
+  const [page, setPage] = useState(1);
+  const limit = 10;
+  const { data, isLoading, error } = useQuery<Data>(
+    ['getUsers', page, limit],
+    () => GetUsers({ limit, page }),
+    {
+      keepPreviousData: true,
+    }
+  );
+  const changePage = ()=> {
+    setPage(page + 1);
+  }
   if (isLoading) {
-    return <div>Loading...</div>;
+    return <div><CircularProgress/></div>;
   }
   
   if (error) {
-    return <div>Error loading popular products</div>;
+    return <div>Ошибка данных</div>;
   }
+  
   return (
     <TableContainer component={Paper}>
       <Table>
@@ -53,7 +64,7 @@ const App = () => {
           </TableRow>
         </TableHead>
         <TableBody>
-          {data?.users.map((user: any) => (
+          {data?.users.map((user: User) => (
             <TableRow key={user.id}>
               <TableCell>
                 <Avatar src={user.image} alt={`${user.firstName} ${user.lastName}`} />
@@ -65,6 +76,12 @@ const App = () => {
           ))}
         </TableBody>
       </Table>
+      <Pagination
+        count={data?.total ? Math.ceil(data.total / limit) : 0}
+        page={page}
+        onChange={() => changePage()}
+        style={{ margin: '20px auto', display: 'flex', justifyContent: 'center' }}
+      />
     </TableContainer>
   );
 }
